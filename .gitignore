@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+.venv/
+data/raw/
+data/extract/
+data/clean/
+data/quality/
+*.pdf
+*.csv
+*.xlsx
+*.json
+!data/sample/*
