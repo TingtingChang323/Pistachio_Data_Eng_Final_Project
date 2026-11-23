@@ -34,11 +34,12 @@ def build_manifest(filename, pdf_bytes, source_url=None, retrieved_at=None):
 
 
 def main():
-    """Write the manifest in the extract directory for this report month."""
+    """Write a local manifest and optionally upload its original PDF."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("pdf", nargs="?", type=Path, default=PDF_PATH)
     parser.add_argument("--source-url")
     parser.add_argument("--retrieved-at", help="Download timestamp, if recorded")
+    parser.add_argument("--upload-s3", action="store_true", help="Upload the original PDF to S3")
     args = parser.parse_args()
     pdf_bytes = args.pdf.read_bytes()
     manifest = build_manifest(args.pdf.name, pdf_bytes)
@@ -51,6 +52,16 @@ def main():
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(path)
+
+    if args.upload_s3:
+        from botocore.exceptions import BotoCoreError, ClientError
+
+        from s3_upload import upload_pdf
+
+        try:
+            print(upload_pdf(pdf_bytes, args.pdf.name, manifest["report_month"]))
+        except (BotoCoreError, ClientError, ValueError) as error:
+            parser.exit(1, f"S3 upload failed: {error}\n")
 
 
 if __name__ == "__main__":
