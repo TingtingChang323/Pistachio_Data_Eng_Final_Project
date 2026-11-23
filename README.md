@@ -19,7 +19,7 @@ psql -X -v ON_ERROR_STOP=1 -f sql/acp.sql
 
 For another PostgreSQL server, set `PGHOST`, `PGPORT`, `PGUSER`, and `PGDATABASE`. Use `~/.pgpass` for password authentication.
 
-## Run ACP
+## Run ACP Dataset
 
 Set `REPORT_MONTH` in `src/acp/config.py`. Adjust `PDF_PATH` there if the filename differs.
 
@@ -27,6 +27,19 @@ Set `REPORT_MONTH` in `src/acp/config.py`. Adjust `PDF_PATH` there if the filena
 cd src/acp
 python extract.py && python ingestion.py && python clean.py
 ```
+
+### Optional S3 upload
+
+From `src/acp/`, set `AWS_PROFILE` once per terminal session. Replace
+`pistachio` with your own profile name if it differs.
+
+```bash
+export AWS_PROFILE=pistachio
+python extract.py --upload-s3
+aws s3api get-bucket-versioning --bucket pistachio-project --region us-east-1
+```
+
+The upload skips an identical PDF and fails if the same key contains different content.
 
 ## Layout
 
@@ -46,6 +59,7 @@ Pistachio_Data_Eng_Final_Project/
 │       ├── clean.py
 │       ├── config.py
 │       ├── quality_log.py
+│       ├── s3_upload.py
 │       └── database.py
 └── data/          # Local data
     ├── raw/

@@ -1,1 +1,2 @@
 pdfplumber>=0.11,<0.12
+boto3[crt]>=1.41,<2
