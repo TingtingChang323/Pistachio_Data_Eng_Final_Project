@@ -8,9 +8,14 @@ from pathlib import Path
 
 import pdfplumber
 
-from config import EXTRACT_DIR, PDF_PATH
-from database import RAW_TABLES, query, json_value
-from extract import MONTH_NAMES, build_manifest
+if __package__:
+    from .config import EXTRACT_DIR, PDF_PATH
+    from .database import RAW_TABLES, query, json_value
+    from .extract import MONTH_NAMES, build_manifest
+else:
+    from config import EXTRACT_DIR, PDF_PATH
+    from database import RAW_TABLES, query, json_value
+    from extract import MONTH_NAMES, build_manifest
 
 FORMS = ("open_inshell", "closed_shell", "shelling_stock", "kernels", "total")
 

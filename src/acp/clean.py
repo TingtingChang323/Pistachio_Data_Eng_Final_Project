@@ -8,10 +8,16 @@ from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 
-from config import CLEAN_CSV_DIR, QUALITY_LOG_PATH, REPORT_MONTH
-from database import RAW_TABLES, json_value, query
-from ingestion import FORMS
-from quality_log import write_log
+if __package__:
+    from .config import CLEAN_CSV_DIR, QUALITY_LOG_PATH, REPORT_MONTH
+    from .database import RAW_TABLES, json_value, query
+    from .ingestion import FORMS
+    from .quality_log import write_log
+else:
+    from config import CLEAN_CSV_DIR, QUALITY_LOG_PATH, REPORT_MONTH
+    from database import RAW_TABLES, json_value, query
+    from ingestion import FORMS
+    from quality_log import write_log
 
 NUMBER = re.compile(r"(?:-?[0-9]+|-?[0-9]{1,3}(?:,[0-9]{3})+|\((?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)\))")
 DETAIL_TYPES = ("country", "other_region")

@@ -9,7 +9,10 @@ from pathlib import Path
 
 import pdfplumber
 
-from config import EXTRACT_DIR, PDF_PATH
+if __package__:
+    from .config import EXTRACT_DIR, PDF_PATH
+else:
+    from config import EXTRACT_DIR, PDF_PATH
 
 MONTH_NAMES = {"2026-09": "September", "2026-10": "October"}
 SOURCE_PAGE = "https://acpistachios.org/industry-resources/shipment-reports/"
@@ -56,7 +59,10 @@ def main():
     if args.upload_s3:
         from botocore.exceptions import BotoCoreError, ClientError
 
-        from s3_upload import upload_pdf
+        if __package__:
+            from .s3_upload import upload_pdf
+        else:
+            from s3_upload import upload_pdf
 
         try:
             print(upload_pdf(pdf_bytes, args.pdf.name, manifest["report_month"]))
