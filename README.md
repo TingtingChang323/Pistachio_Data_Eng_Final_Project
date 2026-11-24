@@ -33,6 +33,8 @@ python -m src.acp.ingestion &&
 python -m src.acp.clean
 ```
 
+See the [ACP data dictionary](docs/acp_data_dictionary.md).
+
 ## Run USDA PSD Dataset
 
 Run from the repository root. The default download date is `2026-11-22`.
@@ -51,8 +53,7 @@ See the [USDA PSD data dictionary](docs/usda_psd_data_dictionary.md).
 ## Run FAOSTAT Trade Dataset
 
 Run from the repository root. The default download date is `2026-11-23`.
-Keep the downloaded archive zipped. Extract streams the 8.5 GB CSV inside it
-and takes about a minute.
+Keep the archive zipped. Extract scans the 8.5 GB CSV inside it in about a minute.
 
 ```bash
 python -m src.fao_trade.extract &&
@@ -60,7 +61,7 @@ python -m src.fao_trade.ingestion &&
 python -m src.fao_trade.clean
 ```
 
-- **Other dates** Put `Trade_DetailedTradeMatrix_E_All_Data_(Normalized).zip` in `data/raw/fao_trade/YYYY-MM-DD/` and pass `--retrieved-on YYYY-MM-DD` to each command.
+- **Other dates** Put the zip in `data/raw/fao_trade/YYYY-MM-DD/` and pass `--retrieved-on YYYY-MM-DD` to each command.
 - **CSV export** Add `--export-csv` to the clean command.
 
 See the [FAOSTAT trade data dictionary](docs/fao_trade_data_dictionary.md).
@@ -75,7 +76,7 @@ python -m src.fao_prices.ingestion &&
 python -m src.fao_prices.clean
 ```
 
-- **Other dates** Put the FAOSTAT CSV export in `data/raw/fao_prices/YYYY-MM-DD/`, pass its path to extract, and pass `--retrieved-on YYYY-MM-DD` to each command.
+- **Other dates** Put the CSV in `data/raw/fao_prices/YYYY-MM-DD/`, pass its path to extract, and pass `--retrieved-on YYYY-MM-DD` to each command.
 - **CSV export** Add `--export-csv` to the clean command.
 
 See the [FAOSTAT producer prices data dictionary](docs/fao_prices_data_dictionary.md).
@@ -122,15 +123,7 @@ Pistachio_Data_Eng_Final_Project/
 │   │   └── database.py
 │   ├── usda_psd/
 │   ├── fao_trade/
-│   │   ├── extract.py
-│   │   ├── ingestion.py
-│   │   ├── clean.py
-│   │   └── config.py
 │   └── fao_prices/
-│       ├── extract.py
-│       ├── ingestion.py
-│       ├── clean.py
-│       └── config.py
 └── data/          # Local data
     ├── raw/
     │   ├── acp/
@@ -140,10 +133,7 @@ Pistachio_Data_Eng_Final_Project/
     ├── extract/
     │   ├── acp/
     │   ├── usda_psd/2026-11-22/manifest.json
-    │   ├── fao_trade/2026-11-23/
-    │   │   ├── manifest.json
-    │   │   ├── pistachio_rows.csv
-    │   │   └── Trade_DetailedTradeMatrix_E_*Countries.csv, *_Flags.csv
+    │   ├── fao_trade/2026-11-23/manifest.json, pistachio_rows.csv, code lists
     │   └── fao_prices/2026-11-23/manifest.json
     ├── clean/
     │   ├── acp/
