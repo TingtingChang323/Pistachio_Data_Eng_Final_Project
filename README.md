@@ -17,6 +17,7 @@ export PGDATABASE=pistachio
 psql -X -v ON_ERROR_STOP=1 -f sql/acp.sql
 psql -X -v ON_ERROR_STOP=1 -f sql/usda_psd.sql
 psql -X -v ON_ERROR_STOP=1 -f sql/fao_trade.sql
+psql -X -v ON_ERROR_STOP=1 -f sql/fao_prices.sql
 ```
 
 For another PostgreSQL server, set `PGHOST`, `PGPORT`, `PGUSER`, and `PGDATABASE`. Use `~/.pgpass` for password authentication.
@@ -64,6 +65,21 @@ python -m src.fao_trade.clean
 
 See the [FAOSTAT trade data dictionary](docs/fao_trade_data_dictionary.md).
 
+## Run FAOSTAT Producer Prices Dataset
+
+Run from the repository root. The default download date is `2026-11-23`.
+
+```bash
+python -m src.fao_prices.extract &&
+python -m src.fao_prices.ingestion &&
+python -m src.fao_prices.clean
+```
+
+- **Other dates** Put the FAOSTAT CSV export in `data/raw/fao_prices/YYYY-MM-DD/`, pass its path to extract, and pass `--retrieved-on YYYY-MM-DD` to each command.
+- **CSV export** Add `--export-csv` to the clean command.
+
+See the [FAOSTAT producer prices data dictionary](docs/fao_prices_data_dictionary.md).
+
 ## Optional S3 Upload
 
 Set your AWS profile once per terminal session.
@@ -88,11 +104,13 @@ Pistachio_Data_Eng_Final_Project/
 ├── docs/
 │   ├── acp_data_dictionary.md
 │   ├── usda_psd_data_dictionary.md
-│   └── fao_trade_data_dictionary.md
+│   ├── fao_trade_data_dictionary.md
+│   └── fao_prices_data_dictionary.md
 ├── sql/
 │   ├── acp.sql
 │   ├── usda_psd.sql
-│   └── fao_trade.sql
+│   ├── fao_trade.sql
+│   └── fao_prices.sql
 ├── src/
 │   ├── acp/
 │   │   ├── extract.py
@@ -103,7 +121,12 @@ Pistachio_Data_Eng_Final_Project/
 │   │   ├── s3_upload.py
 │   │   └── database.py
 │   ├── usda_psd/
-│   └── fao_trade/
+│   ├── fao_trade/
+│   │   ├── extract.py
+│   │   ├── ingestion.py
+│   │   ├── clean.py
+│   │   └── config.py
+│   └── fao_prices/
 │       ├── extract.py
 │       ├── ingestion.py
 │       ├── clean.py
@@ -112,22 +135,26 @@ Pistachio_Data_Eng_Final_Project/
     ├── raw/
     │   ├── acp/
     │   ├── usda_psd/2026-11-22/psd.xls
-    │   └── fao_trade/2026-11-23/Trade_DetailedTradeMatrix_E_All_Data_(Normalized).zip
+    │   ├── fao_trade/2026-11-23/Trade_DetailedTradeMatrix_E_All_Data_(Normalized).zip
+    │   └── fao_prices/2026-11-23/FAOSTAT_data_en_11-23-2026.csv
     ├── extract/
     │   ├── acp/
     │   ├── usda_psd/2026-11-22/manifest.json
-    │   └── fao_trade/2026-11-23/
-    │       ├── manifest.json
-    │       ├── pistachio_rows.csv
-    │       └── Trade_DetailedTradeMatrix_E_*Countries.csv, *_Flags.csv
+    │   ├── fao_trade/2026-11-23/
+    │   │   ├── manifest.json
+    │   │   ├── pistachio_rows.csv
+    │   │   └── Trade_DetailedTradeMatrix_E_*Countries.csv, *_Flags.csv
+    │   └── fao_prices/2026-11-23/manifest.json
     ├── clean/
     │   ├── acp/
     │   ├── usda_psd/2026-11-22/pistachio_psd.csv
-    │   └── fao_trade/2026-11-23/fao_pistachio_trade.csv
+    │   ├── fao_trade/2026-11-23/fao_pistachio_trade.csv
+    │   └── fao_prices/2026-11-23/fao_pistachio_producer_prices.csv
     └── quality/
         ├── acp/quality_log.csv
         ├── usda_psd/quality_log.csv
-        └── fao_trade/quality_log.csv
+        ├── fao_trade/quality_log.csv
+        └── fao_prices/quality_log.csv
 ```
 
 The JSONL files are from the earlier workflow. The current loader writes raw
