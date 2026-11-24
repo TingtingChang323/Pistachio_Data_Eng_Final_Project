@@ -2,6 +2,19 @@
 
 The inputs are the ACP September (12 pages) and October (13 pages) 2026 Inventory Shipment **Pounds** PDFs. The parser uses page 1 for inventory and shipment summaries and pages 3–5 for ACP monthly export destinations. Pages 9 onward are a separate Census/USA Trade Online report and are intentionally excluded. Original PDFs are never changed. September is the first month of crop year 2026/2027, so its monthly and YTD shipment quantities are equal; they remain separate observations and must not be added together.
 
+## Storage
+
+| Location | Contents |
+| --- | --- |
+| `raw/acp/YYYY-MM/` PDF in S3 | Original report for team access and reproducibility, uploaded with `--upload-s3` |
+| `raw.acp_reports` in PostgreSQL | One manifest per report month with the PDF SHA-256, size, crop year, and source page |
+| `raw.acp_inventory`, `raw.acp_shipments`, `raw.acp_export_destinations` in PostgreSQL | Source cells as printed in a JSONB payload, keyed by report month and source row |
+| `clean.acp_inventory`, `clean.acp_shipments`, `clean.acp_export_destinations` in PostgreSQL | Validated long-format tables described below |
+| `data/clean/acp/YYYY-MM/` | Optional CSV exports of the clean tables |
+| `data/quality/acp/quality_log.csv` | Quality findings for each report month |
+
+## Clean tables
+
 The three CSVs use long format. `quantity_lb` is a signed integer in pounds. `product_form` is one of `open_inshell`, `closed_shell`, `shelling_stock`, `kernels`, or `total`. `total` is a reported check value, never another product to add to the other four.
 
 `inventory.csv`: `report_month,as_of_date,crop_year,inventory_item,product_form,quantity_lb,source_file,source_page`. `as_of_date` is only populated when the report states it explicitly (carryover and estimated marketable inventory). Other rows are part of the report's year-to-date summary, not point-in-time observations with a separately stated date. Inventory adjustments can be negative. The shipment lines in this table are inventory-accounting components; use `shipments.csv` for shipment analysis.
@@ -9,5 +22,7 @@ The three CSVs use long format. `quantity_lb` is a signed integer in pounds. `pr
 `shipments.csv`: `report_month,observation_month,crop_year,period_type,flow,product_form,quantity_lb,source_file,source_page`. The clean table includes current-crop-year `monthly` and `ytd` for `domestic` and `export`. They must never be summed together. `flow=total` is a reported check value.
 
 `export_destinations.csv`: `report_month,observation_month,crop_year,period_type,region_raw,destination_raw,destination_type,product_form,quantity_lb,value_status,source_file,source_page`. `destination_type` is `country` or `other_region`. China and Hong Kong stay distinct. Country labels are kept exactly as printed; no country mapping is attempted yet. Blank destination cells become zero only after row and region totals reconcile; `value_status=inferred_zero` distinguishes them from `reported` numbers. Entirely blank destination rows remain in raw PostgreSQL payloads and produce inferred-zero clean rows. Inventory blanks stay null in raw and are omitted from clean because their meaning is not established. Regional subtotals and overall totals remain in raw PostgreSQL payloads and are used for checks; they are not country observations. Negative reported adjustments are retained.
+
+## Validation
 
 `data/quality/acp/quality_log.csv` is the single ACP quality log. It records observed issues, actions, and a reconciliation summary. A rerun replaces that month’s entries. Critical failures stop publication. Raw table rows are keyed by report month and source row number, with the original cell text and nulls in a JSONB payload. The raw shipment table also retains comparative crop years. CSVs are optional exports of the validated clean tables.
